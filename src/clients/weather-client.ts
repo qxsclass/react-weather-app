@@ -1,4 +1,3 @@
-// src/clients/weather-client.ts
 import { apiClient } from './base/api-client';
 import { z } from 'zod';
 import { getConfig } from '@/configs';
@@ -35,6 +34,7 @@ export const weatherClient = {
         q: city,
         appid: apiKey,
         units: 'metric',
+        lang: 'zh-cn',
       },
     });
   },

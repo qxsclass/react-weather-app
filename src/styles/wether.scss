@@ -1,0 +1,102 @@
+@import '~weather-icons/css/weather-icons.css';
+body {
+  background-color: #eef1f5; // A light grey-blue background that is easy on the eyes
+  font-family: 'Arial', sans-serif;
+}
+
+.weather-container {
+  background: linear-gradient(to right, #6dd5ed, #2193b0);
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  text-align: center;
+  font-family: 'Arial', sans-serif;
+  margin: 20px auto;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+.weather-temp {
+  font-size: 3rem;
+  font-weight: bold;
+}
+
+.weather-desc {
+  font-size: 1.2rem;
+  margin: 10px 0;
+}
+
+.weather-info {
+  margin: 10px 0;
+}
+
+.weather-forecast {
+  display: flex;
+  justify-content: space-between;
+}
+
+.input-card, .button-card {
+  background: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin: 10px auto;
+  max-width: 500px;
+  display: flex;
+  justify-content: space-between; // Align input and button in a row
+  align-items: center; // Center align items vertically
+  gap: 10px; // Adds a gap between input and button
+}
+
+input[type="text"] {
+  flex-grow: 1; // Allows input to fill available space
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px;
+  font-size: 16px;
+  &:focus {
+    border-color: #66afe9;
+    outline: none;
+    box-shadow: 0 0 8px rgba(102, 175, 233, .6);
+  }
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #f0ad4e;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: white;
+  &:hover {
+    background-color: #ec971f;
+  }
+}
+
+.weather-icon-card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  margin: 20px auto;
+  text-align: center;
+  max-width: 300px;
+}
+
+.weather-icon {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 10px;
+}
+
+.weather-icon-description {
+  font-size: 16px;
+  color: #555;
+}
+
+.wi {
+  color: #f0ad4e;
+  font-size: 24px;
+}
