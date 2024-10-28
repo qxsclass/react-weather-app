@@ -1,6 +1,6 @@
 // pages/weather.tsx
 import { useState } from 'react';
-import {weatherClient} from "@/clients/weather-client";
+import { weatherClient } from '@/clients/weather-client';
 
 interface WeatherData {
   name: string;

@@ -1,6 +1,7 @@
 // src/clients/weather-client.ts
 import { apiClient } from './base/api-client';
 import { z } from 'zod';
+import { getConfig } from '@/configs';
 
 const WeatherSchema = z.object({
   name: z.string(),
@@ -20,17 +21,20 @@ const WeatherSchema = z.object({
   }),
 });
 
+const config = getConfig();
+const apiKey = config.openWeatherApiKey;
+
 export const weatherClient = {
   async getWeatherByCity(city: string) {
-    console.log(process.env.OPENWEATHER_API_KEY);
+    console.log(apiKey);
     return apiClient({
       method: 'GET',
       url: `https://api.openweathermap.org/data/2.5/weather`,
       zodSchema: WeatherSchema,
       queryParams: {
         q: city,
-        appid: process.env.OPENWEATHER_API_KEY ?? 'aeb40a22f63323746108fcefb00c0f9b', // 你的 API 密钥
-        units: 'metric', // 使用摄氏度
+        appid: apiKey,
+        units: 'metric',
       },
     });
   },
