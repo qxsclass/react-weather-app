@@ -167,4 +167,19 @@ export const weatherClient = {
       },
     });
   },
+
+  async getCityNameFromCoords(lat: string, lon: string) {
+    return apiClient({
+      method: 'GET',
+      url: `http://api.openweathermap.org/geo/1.0/reverse`,
+      zodSchema: LocationsSchema,
+      queryParams: {
+        lat,
+        lon,
+        limit: '1',
+        appid: apiKey,
+        lang: 'zh_cn',
+      },
+    });
+  },
 };

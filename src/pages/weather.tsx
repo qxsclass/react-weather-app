@@ -64,7 +64,7 @@ const MultiDayForecast = ({ forecastData }) => {
 };
 
 const WeatherPage = () => {
-  const [city, setCity] = useState('Chengdu');
+  const [city, setCity] = useState('Beijing');
   const [weather, setWeather] = useState(null);
   const [forecast, setForecast] = useState(null);
   const [hourlyData, setHourlyData] = useState(null);
@@ -90,7 +90,26 @@ const WeatherPage = () => {
   };
 
   useEffect(() => {
-    fetchWeatherAndForecast();
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        // 假设这里有一个函数从API转换经纬度到城市名
+        const cityNameData = await weatherClient.getCityNameFromCoords(
+          latitude.toString(),
+          longitude.toString()
+        );
+        console.log('Get the city data:');
+        console.log(cityNameData);
+        setCity(cityNameData[0].name);
+        fetchWeatherAndForecast();
+      },
+      (err) => {
+        console.error(err);
+        setError('Unable to retrieve your location');
+        setCity('Beijing'); // 默认城市
+        fetchWeatherAndForecast();
+      }
+    );
   }, [city]);
 
   return (
