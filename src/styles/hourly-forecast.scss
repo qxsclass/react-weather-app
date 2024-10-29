@@ -1,0 +1,27 @@
+.hourly-forecast-card {
+  background: linear-gradient(to right, #6dd5ed, #2193b0);
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  margin: 20px auto;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .hourly-weather-container {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+
+    .hour-weather {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      i {
+        font-size: 24px;
+      }
+    }
+  }
+}

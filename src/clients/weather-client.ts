@@ -20,6 +20,104 @@ const WeatherSchema = z.object({
   }),
 });
 
+const WeatherPointSchema = z.object({
+  dt: z.number(), // 时间戳
+  main: z.object({
+    temp: z.number(),
+    feels_like: z.number(),
+    temp_min: z.number(),
+    temp_max: z.number(),
+    pressure: z.number(),
+    sea_level: z.number(),
+    grnd_level: z.number(),
+    humidity: z.number(),
+    temp_kf: z.number(),
+  }),
+  weather: z.array(
+    z.object({
+      id: z.number(),
+      main: z.string(),
+      description: z.string(),
+      icon: z.string(),
+    })
+  ),
+  clouds: z.object({
+    all: z.number(),
+  }),
+  wind: z.object({
+    speed: z.number(),
+    deg: z.number(),
+    gust: z.number(),
+  }),
+  visibility: z.number(),
+  pop: z.number(),
+  rain: z.optional(
+    z.object({
+      '3h': z.number(),
+    })
+  ),
+  sys: z.object({
+    pod: z.string(),
+  }),
+  dt_txt: z.string(),
+});
+
+// 定义整个天气预报的模式
+// https://openweathermap.org/forecast5
+const ForecastSchema = z.object({
+  cod: z.string(),
+  message: z.number(),
+  cnt: z.number(),
+  list: z.array(WeatherPointSchema),
+  city: z.object({
+    id: z.number(),
+    name: z.string(),
+    coord: z.object({
+      lat: z.number(),
+      lon: z.number(),
+    }),
+    country: z.string(),
+    population: z.number(),
+    timezone: z.number(),
+    sunrise: z.number(),
+    sunset: z.number(),
+  }),
+});
+
+const DailyForecastSchema = z.object({
+  date: z.number(),
+  temp: z.object({
+    day: z.number(),
+    min: z.number(),
+    max: z.number(),
+    night: z.number(),
+    eve: z.number(),
+    morn: z.number(),
+  }),
+  weather: z.array(
+    z.object({
+      id: z.number(),
+      main: z.string(),
+      description: z.string(),
+      icon: z.string(),
+    })
+  ),
+  pressure: z.number(),
+  humidity: z.number(),
+});
+
+const LocationSchema = z.object({
+  name: z.string(),
+  local_names: z.record(z.string()).optional(),
+  lat: z.number(),
+  lon: z.number(),
+  country: z.string(),
+  state: z.string().optional()
+});
+
+const LocationsSchema = z.array(LocationSchema);
+
+
 const config = getConfig();
 const apiKey = config.openWeatherApiKey;
 
@@ -34,7 +132,38 @@ export const weatherClient = {
         q: city,
         appid: apiKey,
         units: 'metric',
-        lang: 'zh-cn',
+        lang: 'zh_cn',
+      },
+    });
+  },
+
+  async getForecastByCity(city: string) {
+    return apiClient({
+      method: 'GET',
+      // https://api.openweathermap.org/data/2.5/onecall
+      url: `https://api.openweathermap.org/data/2.5/forecast`,
+      zodSchema: ForecastSchema,
+      queryParams: {
+        q: city,
+        exclude: 'minutely,hourly,current,alerts',
+        appid: apiKey,
+        units: 'metric',
+        lang: 'zh_cn',
+      },
+    });
+  },
+
+  async getGeosByCity(city: string) {
+    return apiClient({
+      method: 'GET',
+      // https://openweathermap.org/api/geocoding-api
+      url: `http://api.openweathermap.org/geo/1.0/direct`,
+      zodSchema: LocationsSchema,
+      queryParams: {
+        q: city,
+        appid: apiKey,
+        limit: '1',
+        lang: 'zh_cn',
       },
     });
   },

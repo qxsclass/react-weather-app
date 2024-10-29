@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { z, ZodSchema } from 'zod';
+import { ZodSchema } from 'zod';
 import { InvalidResponseError } from '@/errors/invalid-response-error';
 
 export async function apiClient<T>({
@@ -26,8 +26,8 @@ export async function apiClient<T>({
       },
     });
 
-    // 使用 zod 解析和验证返回的数据
-    return zodSchema.parse(response.data);
+    // 使用传入的 zodSchema 解析和验证返回的数据
+    return zodSchema.parse(response.data); // 正确使用 zodSchema
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error(

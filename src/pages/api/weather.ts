@@ -2,6 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import axios from 'axios';
 import { ZodSchema, z } from 'zod';
+import getLatLonByCity from '@/utils/dealGeoInfo';
 
 // 定义天气信息的 Zod 模式
 const WeatherSchema = z.object({
@@ -31,28 +32,15 @@ export default async function handler(
     console.log('accept city name:', city);
     try {
       // 获取地理编码
-      const geoResponse = await axios.get(
-        `http://api.openweathermap.org/geo/1.0/direct`,
-        {
-          params: {
-            q: city,
-            limit: 1,
-            appid: process.env.OPENWEATHER_API_KEY,
-          },
-        }
-      );
-
-      const location = geoResponse.data[0];
-      const lat = location.lat;
-      const lon = location.lon;
-
+      const geos = getLatLonByCity(city);
+      console.log('accept geos:', geos);
       // 获取天气信息
       const weatherResponse = await axios.get(
         `https://api.openweathermap.org/data/2.5/weather`,
         {
           params: {
-            lat: lat,
-            lon: lon,
+            lat: geos.lat,
+            lon: geos.lon,
             appid: process.env.OPENWEATHER_API_KEY,
           },
         }

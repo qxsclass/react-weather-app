@@ -1,0 +1,59 @@
+@import '~weather-icons/css/weather-icons.css';
+
+.forecast-card {
+  background: linear-gradient(to right, #6dd5ed, #2193b0);
+  color: #fff;
+  font-family: 'Arial', sans-serif;
+  border-radius: 10px;
+  padding: 20px;
+  margin: 20px 0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+  h3 {
+    color: white;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .day-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 16px;
+
+    .day-name {
+      font-weight: bold;
+      flex-grow: 1;
+      margin-right: 20px;
+    }
+
+    .weather-icon {
+      width: 40px;
+      height: 40px;
+      margin-right: 10px;
+      filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.6));
+    }
+
+    .temp-range {
+      flex-grow: 2;
+      background-color: #e0e0e0;
+      margin-left: 10px;
+      height: 10px;
+      border-radius: 5px;
+      position: relative;
+
+      .temp-fill {
+        background-color: #ffa726;
+        height: 100%;
+        border-radius: 5px;
+      }
+    }
+
+    .temp-label {
+      min-width: 70px;
+      text-align: right;
+      margin-left: 10px;
+    }
+  }
+}

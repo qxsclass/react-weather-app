@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { weatherClient } from '@/clients/weather-client';
 import '@/styles/wether.scss';
+import HourlyForecast from '@/components/hourly-forecast';
+import ForecastCard from '@/components/forecast-card';
+import { calculateDailyAverages, groupByDay } from '@/utils/deal-daily-wether';
 
-// Separate WeatherDisplay component
 const WeatherDisplay = ({ weatherData }) => {
-  if (!weatherData) return null; // Don't render if no weather data is available
+  if (!weatherData) return null;
 
   const getIconClass = (weather) => {
     switch (weather) {
@@ -24,8 +26,8 @@ const WeatherDisplay = ({ weatherData }) => {
       <i className={getIconClass(weatherData.weather[0].main)}></i>
       <div>
         <h3>Weather in {weatherData.name}</h3>
-        <p>Temperature: {weatherData.main.temp}°C</p>
-        <p>Feels Like: {weatherData.main.feels_like}°C</p>
+        <p>Temperature: {weatherData.main.temp.toFixed(1)}°C</p>
+        <p>Feels Like: {weatherData.main.feels_like.toFixed(1)}°C</p>
         <p>Humidity: {weatherData.main.humidity}%</p>
         <p>Description: {weatherData.weather[0].description}</p>
       </div>
@@ -33,28 +35,62 @@ const WeatherDisplay = ({ weatherData }) => {
   );
 };
 
+const MultiDayForecast = ({ forecastData }) => {
+  // 安全检查
+  if (!forecastData || !Array.isArray(forecastData)) return null;
+
+  const formatDate = (timestamp) => {
+    return new Date(timestamp * 1000).toLocaleDateString('zh-CN', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  return (
+    <div className="forecast-card">
+      <h3>未来几天的天气预报</h3>
+      {forecastData.map((day) => (
+        <div key={day.dt}>
+          <p>
+            {formatDate(day.dt)} - {day.main.temp_max.toFixed(1)}°C /{' '}
+            {day.main.temp_min.toFixed(1)}°C - {day.weather[0].description}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 const WeatherPage = () => {
   const [city, setCity] = useState('Chengdu');
   const [weather, setWeather] = useState(null);
+  const [forecast, setForecast] = useState(null);
+  const [hourlyData, setHourlyData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const fetchWeather = async () => {
-    if (!city) return; // Ensure there is a city set
+  const fetchWeatherAndForecast = async () => {
     setLoading(true);
     setError('');
     try {
-      const data = await weatherClient.getWeatherByCity(city);
-      setWeather(data);
+      const weatherData = await weatherClient.getWeatherByCity(city);
+      const forecastResponse = await weatherClient.getForecastByCity(city);
+      console.log(forecastResponse);
+      setWeather(weatherData);
+      setForecast(forecastResponse.list);
+      setHourlyData(forecastResponse.list.slice(0, 6));
+      console.log(forecast);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch weather data');
+      setError(err.message || 'Failed to fetch weather data');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchWeather(); // Call on component mount and when city changes
+    fetchWeatherAndForecast();
   }, [city]);
 
   return (
@@ -66,14 +102,21 @@ const WeatherPage = () => {
           onChange={(e) => setCity(e.target.value)}
           placeholder="Enter city name"
         />
-        <button onClick={fetchWeather} disabled={loading}>
+        <button onClick={fetchWeatherAndForecast} disabled={loading}>
           Get Weather
         </button>
       </div>
 
       {loading && <p>Loading...</p>}
-      {error && <p className="error-message">Error: {error}</p>}
+      {error && <p className="error-message">{error}</p>}
       {weather && <WeatherDisplay weatherData={weather} />}
+      {hourlyData && <HourlyForecast hourlyData={hourlyData} />}
+      {/*{forecast && <MultiDayForecast forecastData={forecast} />}*/}
+      {forecast && (
+        <ForecastCard
+          forecastData={calculateDailyAverages(groupByDay(forecast))}
+        />
+      )}
     </div>
   );
 };
