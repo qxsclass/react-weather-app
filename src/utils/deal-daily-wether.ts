@@ -1,22 +1,27 @@
-export const groupByDay = (list: []) => {
-  if (!list) return {};
-  console.log(list);
-  const groupedByDay = {};
+type WeatherData = {
+  dt: number; // Unix timestamp
+  main: {
+    temp: number;
+    feels_like: number;
+  };
+  weather: Array<{
+    main: string;
+  }>;
+};
+
+export const groupByDay = (list: WeatherData[]) => {
+  const groupedByDay: Record<string, WeatherData[]> = {};
   list.forEach((item) => {
     const date = new Date(item.dt * 1000).toLocaleDateString('zh-CN');
-    if (!groupedByDay[date]) {
-      groupedByDay[date] = [];
-    }
+    groupedByDay[date] = groupedByDay[date] || [];
     groupedByDay[date].push(item);
   });
   return groupedByDay;
 };
 
-export const calculateDailyAverages = (groupedData) => {
+export const calculateDailyAverages = (groupedData: Record<string, WeatherData[]>) => {
   return Object.keys(groupedData).map((date) => {
     const dayData = groupedData[date];
-    const dateObj = new Date(date);
-
     if (!dayData.length) {
       return {
         date: 'N/A',
@@ -29,34 +34,24 @@ export const calculateDailyAverages = (groupedData) => {
       };
     }
 
-    const temps = dayData
-      .map((item) => item.main.temp)
-      .filter((t) => t != null);
-    const feelsLike = dayData
-      .map((item) => item.main.feels_like)
-      .filter((t) => t != null);
-    const averageTemp = temps.length
-      ? (temps.reduce((acc, curr) => acc + curr, 0) / temps.length).toFixed(1)
-      : 'N/A';
-    const averageFeelsLike = feelsLike.length
-      ? (
-          feelsLike.reduce((acc, curr) => acc + curr, 0) / feelsLike.length
-        ).toFixed(1)
-      : 'N/A';
+    const temps = dayData.map(item => item.main.temp);
+    const feelsLike = dayData.map(item => item.main.feels_like);
+    const averageTemp = temps.length ? (temps.reduce((acc, curr) => acc + curr, 0) / temps.length).toFixed(1) : 'N/A';
+    const averageFeelsLike = feelsLike.length ? (feelsLike.reduce((acc, curr) => acc + curr, 0) / feelsLike.length).toFixed(1) : 'N/A';
     const maxTemp = temps.length ? Math.max(...temps).toFixed(1) : 'N/A';
     const minTemp = temps.length ? Math.min(...temps).toFixed(1) : 'N/A';
 
     const weatherConditions = dayData.reduce((acc, curr) => {
-      if (curr.weather && curr.weather.length && curr.weather[0].main) {
-        acc[curr.weather[0].main] = (acc[curr.weather[0].main] || 0) + 1;
+      const condition = curr.weather[0]?.main;
+      if (condition) {
+        acc[condition] = (acc[condition] || 0) + 1;
       }
       return acc;
-    }, {});
-    const mostFrequentCondition = Object.keys(weatherConditions).reduce(
-      (a, b) => (weatherConditions[a] > weatherConditions[b] ? a : b),
-      'Unknown'
-    );
+    }, {} as Record<string, number>);
 
+    const mostFrequentCondition = Object.keys(weatherConditions).reduce((a, b) => weatherConditions[a] > weatherConditions[b] ? a : b, 'Unknown');
+
+    const dateObj = new Date(date);
     return {
       date: dateObj.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }),
       weekday: dateObj.toLocaleDateString('zh-CN', { weekday: 'short' }),

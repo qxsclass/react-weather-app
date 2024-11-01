@@ -1,0 +1,105 @@
+/* variable.scss */
+
+/* 1. Color Variables */
+$primary-color: #3498db; /* 主色调 - 蓝色 */
+$secondary-color: #2ecc71; /* 辅色调 - 绿色 */
+$accent-color: #e74c3c; /* 强调色 - 红色 */
+$background-color: #ecf0f1; /* 背景色 - 浅灰 */
+$text-color: #2c3e50; /* 主要文本颜色 */
+$muted-color: #95a5a6; /* 次要文本/禁用文本颜色 */
+
+/* 状态颜色 */
+$success-color: #2ecc71; /* 成功状态 */
+$error-color: #e74c3c; /* 错误状态 */
+$warning-color: #f39c12; /* 警告状态 */
+$info-color: #3498db; /* 信息状态 */
+
+/* 2. Typography Variables */
+$font-family-base: 'Helvetica Neue', Arial, sans-serif; /* 基础字体 */
+$font-size-base: 16px; /* 基础字号 */
+$font-size-sm: 14px; /* 小号文字 */
+$font-size-m: 16px;
+$font-size-lg: 18px; /* 大号文字 */
+$font-weight-normal: 400; /* 正常字体权重 */
+$font-weight-bold: 700; /* 加粗字体权重 */
+$line-height-base: 1.5; /* 基础行高 */
+
+/* 3. Spacing Variables (Margins and Padding) */
+$spacing-unit: 8px; /* 基础间距单位 */
+$spacing-sm: $spacing-unit * 0.5; /* 小间距 */
+$spacing-md: $spacing-unit * 1.5; /* 中间距 */
+$spacing-lg: $spacing-unit * 2; /* 大间距 */
+$spacing-xl: $spacing-unit * 3; /* 特大间距 */
+
+/* 4. Border Variables */
+$border-radius: 4px; /* 基础圆角 */
+$border-radius-sm: 2px; /* 小圆角 */
+$border-radius-lg: 8px; /* 大圆角 */
+$border-color: #dcdcdc; /* 边框颜色 */
+$border-width: 1px; /* 边框宽度 */
+$border-style: solid; /* 边框样式 */
+
+/* 5. Shadow Variables */
+$box-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1); /* 小阴影 */
+$box-shadow-md: 0 2px 4px rgba(0, 0, 0, 0.15); /* 中等阴影 */
+$box-shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.2); /* 大阴影 */
+
+/* 6. Z-index Variables */
+$z-index-low: 10; /* 低层级 */
+$z-index-medium: 100; /* 中层级 */
+$z-index-high: 1000; /* 高层级 */
+
+/* 7. Media Queries (Breakpoints) */
+$breakpoint-xs: 480px; /* 超小屏幕 */
+$breakpoint-sm: 768px; /* 小屏幕 */
+$breakpoint-md: 1024px; /* 中等屏幕 */
+$breakpoint-lg: 1200px; /* 大屏幕 */
+$breakpoint-xl: 1440px; /* 超大屏幕 */
+
+/* 8. Transition Variables */
+$transition-duration: 0.3s; /* 过渡时长 */
+$transition-timing-function: ease-in-out; /* 过渡曲线 */
+
+:root {
+  // Color
+  --xgy-color-primary: #0bafff;
+  --xgy-color-success: #00b578;
+  --xgy-color-warning: #ff8f1f;
+  --xgy-color-danger: #ff3141;
+  --xgy-color-white: #ffffff;
+  --xgy-color-text: #333333;
+  --xgy-color-weak: #999999;
+  --xgy-color-light: #cccccc;
+  --xgy-color-border: #eeeeee;
+  --xgy-color-background: #ffffff;
+  --xgy-color-box: #f5f5f5;
+
+  // Padding
+  --xgy-padding-xs: 4px;
+  --xgy-padding-s: 8px;
+  --xgy-padding-m: 12px;
+  --xgy-padding-l: 16px;
+  --xgy-padding-xl: 20px;
+  --xgy-padding-xxl: 24px;
+
+  // Border-radius
+  --xgy-radius-xs: 4px;
+  --xgy-radius-s: 6px;
+  --xgy-radius-m: 8px;
+  --xgy-radius-l: 10px;
+  --xgy-radius-xl: 12px;
+  --xgy-radius-xxl: 14px;
+  --xgy-radius-xxxl: 16px;
+
+  // Font
+  --xgy-font-size-xs: 10px;
+  --xgy-font-size-s: 12px;
+  --xgy-font-size-m: 14px;
+  --xgy-font-size-l: 16px;
+  --xgy-font-size-xl: 18px;
+  --xgy-font-size-xxl: 20px;
+  --xgy-font-size-xxxl: 22px;
+
+  --xgy-font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto,
+    'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
+}

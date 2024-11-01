@@ -1,10 +1,10 @@
 // pages/api/weather.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import axios from 'axios';
-import { ZodSchema, z } from 'zod';
+import { z } from 'zod';
 import getLatLonByCity from '@/utils/dealGeoInfo';
 
-// 定义天气信息的 Zod 模式
+// Define Zod schema for the weather API response validation
 const WeatherSchema = z.object({
   main: z.object({
     temp: z.number(),
@@ -39,8 +39,8 @@ export default async function handler(
         `https://api.openweathermap.org/data/2.5/weather`,
         {
           params: {
-            lat: geos.lat,
-            lon: geos.lon,
+            lat: geos?.lat,
+            lon: geos?.lon,
             appid: process.env.OPENWEATHER_API_KEY,
           },
         }

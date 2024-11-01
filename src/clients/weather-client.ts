@@ -1,6 +1,63 @@
 import { apiClient } from './base/api-client';
 import { z } from 'zod';
 import { getConfig } from '@/configs';
+import '@/assets/styles/index.scss';
+
+// Define the expected structure of the location response
+interface Location {
+  name: string;
+  lat: number;
+  lon: number;
+  country: string;
+  local_names?: Record<string, string>;
+  state?: string;
+}
+
+// This could be the expected structure of the getGeosByCity response
+interface GeoResponse {
+  data: Location[];
+}
+
+interface Weather {
+  name: string;
+  main: {
+    temp: number;
+    feels_like: number;
+    humidity: number;
+  };
+  weather: Array<{
+    main: string;
+    description: string;
+  }>;
+  wind: {
+    speed: number;
+  };
+}
+interface Forecast {
+  list: WeatherPoint[];
+}
+
+interface WeatherPoint {
+  main: {
+    temp: number;
+    feels_like: number;
+    temp_min: number;
+    temp_max: number;
+    pressure: number;
+    sea_level: number;
+    grnd_level: number;
+    humidity: number;
+    temp_kf: number;
+  };
+  weather: {
+    main: string;
+    description: string;
+    id: number;
+    icon: string;
+  }[];
+}
+
+
 
 const WeatherSchema = z.object({
   name: z.string(),
@@ -153,7 +210,7 @@ export const weatherClient = {
     });
   },
 
-  async getGeosByCity(city: string) {
+  async getGeosByCity(city: string): Promise<Location[]>{
     return apiClient({
       method: 'GET',
       // https://openweathermap.org/api/geocoding-api
@@ -179,6 +236,19 @@ export const weatherClient = {
         limit: '1',
         appid: apiKey,
         lang: 'zh_cn',
+      },
+    });
+  },
+
+  async getCitySuggestions(query: string) {
+    return apiClient({
+      method: 'GET',
+      url: `http://api.openweathermap.org/geo/1.0/direct`,
+      zodSchema: LocationsSchema,
+      queryParams: {
+        q: query,
+        limit: '5',
+        appid: apiKey,
       },
     });
   },
