@@ -2,62 +2,12 @@ import { apiClient } from './base/api-client';
 import { z } from 'zod';
 import { getConfig } from '@/configs';
 import '@/assets/styles/index.scss';
+import { WeatherData, WeatherPoint, Forecast, Location } from '@/types/types';
 
-// Define the expected structure of the location response
-interface Location {
-  name: string;
+export interface GeoLocation {
   lat: number;
   lon: number;
-  country: string;
-  local_names?: Record<string, string>;
-  state?: string;
 }
-
-// This could be the expected structure of the getGeosByCity response
-interface GeoResponse {
-  data: Location[];
-}
-
-interface Weather {
-  name: string;
-  main: {
-    temp: number;
-    feels_like: number;
-    humidity: number;
-  };
-  weather: Array<{
-    main: string;
-    description: string;
-  }>;
-  wind: {
-    speed: number;
-  };
-}
-interface Forecast {
-  list: WeatherPoint[];
-}
-
-interface WeatherPoint {
-  main: {
-    temp: number;
-    feels_like: number;
-    temp_min: number;
-    temp_max: number;
-    pressure: number;
-    sea_level: number;
-    grnd_level: number;
-    humidity: number;
-    temp_kf: number;
-  };
-  weather: {
-    main: string;
-    description: string;
-    id: number;
-    icon: string;
-  }[];
-}
-
-
 
 const WeatherSchema = z.object({
   name: z.string(),
@@ -70,6 +20,8 @@ const WeatherSchema = z.object({
     z.object({
       main: z.string(),
       description: z.string(),
+      id: z.number().optional(),
+      icon: z.string().optional(),
     })
   ),
   wind: z.object({
@@ -169,17 +121,63 @@ const LocationSchema = z.object({
   lat: z.number(),
   lon: z.number(),
   country: z.string(),
-  state: z.string().optional()
+  state: z.string().optional(),
 });
 
 const LocationsSchema = z.array(LocationSchema);
 
-
 const config = getConfig();
 const apiKey = config.openWeatherApiKey;
 
+export const getLatLonByCity = async (
+  city: string
+): Promise<GeoLocation | undefined> => {
+  try {
+    const response = await apiClient<Location[]>({
+      method: 'GET',
+      url: `https://api.openweathermap.org/geo/1.0/direct`,
+      zodSchema: LocationsSchema,
+      queryParams: {
+        q: city,
+        appid: apiKey,
+        limit: '1',
+        lang: 'zh_cn',
+      },
+    });
+
+    if (response && response.length > 0) {
+      const location = response[0];
+      return {
+        lat: location.lat,
+        lon: location.lon,
+      };
+    }
+  } catch (e) {
+    console.error('Failed to fetch geolocation:', e);
+  }
+  return undefined;
+};
+
+export const getWeatherByCoords = async (
+  lat: number,
+  lon: number
+): Promise<WeatherData> => {
+  return apiClient({
+    method: 'GET',
+    url: `https://api.openweathermap.org/data/2.5/weather`,
+    zodSchema: WeatherSchema,
+    queryParams: {
+      lat: lat.toString(),
+      lon: lon.toString(),
+      appid: apiKey,
+      units: 'metric',
+      lang: 'zh_cn',
+    },
+  });
+};
+
 export const weatherClient = {
-  async getWeatherByCity(city: string) {
+  async getWeatherByCity(city: string): Promise<WeatherData> {
     console.log(apiKey);
     return apiClient({
       method: 'GET',
@@ -194,7 +192,7 @@ export const weatherClient = {
     });
   },
 
-  async getForecastByCity(city: string) {
+  async getForecastByCity(city: string): Promise<Forecast> {
     return apiClient({
       method: 'GET',
       // https://api.openweathermap.org/data/2.5/onecall
@@ -210,11 +208,11 @@ export const weatherClient = {
     });
   },
 
-  async getGeosByCity(city: string): Promise<Location[]>{
+  async getGeosByCity(city: string): Promise<Location[]> {
     return apiClient({
       method: 'GET',
       // https://openweathermap.org/api/geocoding-api
-      url: `http://api.openweathermap.org/geo/1.0/direct`,
+      url: `https://api.openweathermap.org/geo/1.0/direct`,
       zodSchema: LocationsSchema,
       queryParams: {
         q: city,
@@ -228,7 +226,7 @@ export const weatherClient = {
   async getCityNameFromCoords(lat: string, lon: string) {
     return apiClient({
       method: 'GET',
-      url: `http://api.openweathermap.org/geo/1.0/reverse`,
+      url: `https://api.openweathermap.org/geo/1.0/reverse`,
       zodSchema: LocationsSchema,
       queryParams: {
         lat,
@@ -243,7 +241,7 @@ export const weatherClient = {
   async getCitySuggestions(query: string) {
     return apiClient({
       method: 'GET',
-      url: `http://api.openweathermap.org/geo/1.0/direct`,
+      url: `https://api.openweathermap.org/geo/1.0/direct`,
       zodSchema: LocationsSchema,
       queryParams: {
         q: query,
@@ -252,4 +250,6 @@ export const weatherClient = {
       },
     });
   },
+  getLatLonByCity,
+  getWeatherByCoords,
 };

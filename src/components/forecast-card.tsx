@@ -1,14 +1,6 @@
 import React from 'react';
 import '@/styles/forecast-card.scss';
-
-// Define an interface for a single day's forecast data
-interface DayForecast {
-  date: string; // assuming date is a string for simplicity, e.g., '2024/10/29'
-  weekday: string;
-  condition: string;
-  maxTemp: number;
-  minTemp: number;
-}
+import { DayForecast } from '@/types/types';
 
 // Define props for the ForecastCard component
 interface ForecastCardProps {
@@ -47,13 +39,19 @@ const ForecastCard: React.FC<ForecastCardProps> = ({ forecastData }) => {
           <div className="day-name">{day.weekday}</div>
           <i className={getIconClass(day.condition)}></i>
           <div className="temp-range">
-            <div
-              className="temp-fill"
-              style={{ width: `${(day.maxTemp - day.minTemp) * 10}%` }}
-            ></div>
+            {day.maxTemp !== null && day.minTemp !== null ? (
+              <div
+                className="temp-fill"
+                style={{ width: `${(day.maxTemp - day.minTemp) * 10}%` }}
+              ></div>
+            ) : (
+              <div className="temp-fill" style={{ width: '0%' }}></div>
+            )}
           </div>
           <div className="temp-label">
-            {day.minTemp}°C / {day.maxTemp}°C
+            {day.minTemp !== null && day.maxTemp !== null
+              ? `${day.minTemp}°C / ${day.maxTemp}°C`
+              : 'N/A'}
           </div>
         </div>
       ))}

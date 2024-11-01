@@ -1,13 +1,11 @@
 import React from 'react';
-import { WeatherData } from '@/types/types';
+import { WeatherDisplayProps } from '@/types/types';
 
-const WeatherDisplay: React.FC<{ weatherData: WeatherData }> = ({
-  weatherData,
-}) => {
+const WeatherDisplay: React.FC<WeatherDisplayProps> = ({ weatherData }) => {
   if (!weatherData) return null;
 
-  const getIconClass = (weatherMain: string): string => {
-    switch (weatherMain) {
+  const getIconClass = (weatherCondition: string): string => {
+    switch (weatherCondition) {
       case 'Clear':
         return 'wi wi-day-sunny';
       case 'Clouds':

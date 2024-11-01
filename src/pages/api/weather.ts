@@ -3,6 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import axios from 'axios';
 import { z } from 'zod';
 import getLatLonByCity from '@/utils/dealGeoInfo';
+import { weatherClient } from '@/clients/weather-client';
 
 // Define Zod schema for the weather API response validation
 const WeatherSchema = z.object({
@@ -32,21 +33,20 @@ export default async function handler(
     console.log('accept city name:', city);
     try {
       // 获取地理编码
-      const geos = getLatLonByCity(city);
+      const geos = await getLatLonByCity(city);
       console.log('accept geos:', geos);
-      // 获取天气信息
-      const weatherResponse = await axios.get(
-        `https://api.openweathermap.org/data/2.5/weather`,
-        {
-          params: {
-            lat: geos?.lat,
-            lon: geos?.lon,
-            appid: process.env.OPENWEATHER_API_KEY,
-          },
-        }
-      );
 
-      const weatherData = WeatherSchema.parse(weatherResponse.data);
+      // 检查 geos 是否为 undefined
+      if (!geos) {
+        return res.status(404).json({ error: 'City not found' });
+      }
+
+      // 获取天气信息
+      const weatherResponse = weatherClient.getWeatherByCoords(
+        geos?.lat,
+        geos?.lon
+      );
+      const weatherData = WeatherSchema.parse(weatherResponse);
       res.status(200).json(weatherData);
     } catch (error) {
       console.error('Error fetching weather data:', error);

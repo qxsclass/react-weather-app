@@ -1,23 +1,7 @@
 import React from 'react';
 import '@/styles/hourly-forecast.scss';
+import { HourlyForecastProps } from '@/types/types';
 
-// Define an interface for an hour's weather data
-interface HourWeather {
-  dt: number; // Timestamp
-  main: {
-    temp: number; // Temperature
-  };
-  weather: Array<{
-    id: number; // Weather condition id
-  }>;
-}
-
-// Define props for the HourlyForecast component
-interface HourlyForecastProps {
-  hourlyData: HourWeather[];
-}
-
-// Utility function to get weather icon class
 const getWeatherIcon = (weatherId: number): string => {
   if (weatherId < 300) {
     return 'wi-thunderstorm';
@@ -31,8 +15,10 @@ const getWeatherIcon = (weatherId: number): string => {
     return 'wi-fog';
   } else if (weatherId === 800) {
     return 'wi-day-sunny';
-  } else {
+  } else if (weatherId > 800 && weatherId < 900) {
     return 'wi-cloudy';
+  } else {
+    return 'wi-na';
   }
 };
 
@@ -47,7 +33,9 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ hourlyData }) => {
         {hourlyData.map((hour, index) => (
           <div key={index} className="hour-weather">
             <p>{new Date(hour.dt * 1000).getHours()}:00</p>
-            <i className={`wi ${getWeatherIcon(hour.weather[0].id)}`}></i>
+            <i
+              className={`wi ${hour.weather[0]?.id !== undefined ? getWeatherIcon(hour.weather[0]?.id) : 'wi-na'}`}
+            ></i>
             <p>{hour.main.temp.toFixed(1)}°C</p>
           </div>
         ))}

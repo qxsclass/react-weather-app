@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { weatherClient } from '@/clients/weather-client';
 
-// Define a type for the expected response structure for better type safety
 type GeoLocation = {
   lat: number;
   lon: number;
