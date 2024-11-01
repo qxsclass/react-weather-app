@@ -1,16 +1,5 @@
 import { WeatherPoint, DayForecast } from '@/types/types';
 
-type WeatherData = {
-  dt: number; // Unix timestamp
-  main: {
-    temp: number;
-    feels_like: number;
-  };
-  weather: Array<{
-    main: string;
-  }>;
-};
-
 export const groupByDay = (list: WeatherPoint[]) => {
   const groupedByDay: Record<string, WeatherPoint[]> = {};
   list.forEach((item) => {

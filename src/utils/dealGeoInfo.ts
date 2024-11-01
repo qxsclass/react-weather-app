@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { weatherClient } from '@/clients/weather-client';
 
 type GeoLocation = {

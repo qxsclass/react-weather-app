@@ -2,7 +2,7 @@ import { apiClient } from './base/api-client';
 import { z } from 'zod';
 import { getConfig } from '@/configs';
 import '@/assets/styles/index.scss';
-import { WeatherData, WeatherPoint, Forecast, Location } from '@/types/types';
+import { WeatherData, Forecast, Location } from '@/types/types';
 
 export interface GeoLocation {
   lat: number;
@@ -91,28 +91,6 @@ const ForecastSchema = z.object({
     sunrise: z.number(),
     sunset: z.number(),
   }),
-});
-
-const DailyForecastSchema = z.object({
-  date: z.number(),
-  temp: z.object({
-    day: z.number(),
-    min: z.number(),
-    max: z.number(),
-    night: z.number(),
-    eve: z.number(),
-    morn: z.number(),
-  }),
-  weather: z.array(
-    z.object({
-      id: z.number(),
-      main: z.string(),
-      description: z.string(),
-      icon: z.string(),
-    })
-  ),
-  pressure: z.number(),
-  humidity: z.number(),
 });
 
 const LocationSchema = z.object({
