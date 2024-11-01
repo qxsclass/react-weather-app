@@ -1,6 +1,7 @@
 import React from 'react';
 import '@/styles/hourly-forecast.scss';
 import { HourlyForecastProps } from '@/types/types';
+import { useTranslation } from 'react-i18next';
 
 const getWeatherIcon = (weatherId: number): string => {
   if (weatherId < 300) {
@@ -24,11 +25,12 @@ const getWeatherIcon = (weatherId: number): string => {
 
 // Component definition using TypeScript
 const HourlyForecast: React.FC<HourlyForecastProps> = ({ hourlyData }) => {
+  const { t } = useTranslation();
   if (!hourlyData) return null;
 
   return (
     <div className="hourly-forecast-card">
-      <h3>今日小时天气</h3>
+      <h3>{t('hourlyWeatherTitle')}</h3>
       <div className="hourly-weather-container">
         {hourlyData.map((hour, index) => (
           <div key={index} className="hour-weather">

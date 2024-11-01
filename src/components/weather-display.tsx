@@ -1,7 +1,10 @@
 import React from 'react';
 import { WeatherDisplayProps } from '@/types/types';
+import { useTranslation } from 'react-i18next';
+import '@/styles/weather-display.scss';
 
 const WeatherDisplay: React.FC<WeatherDisplayProps> = ({ weatherData }) => {
+  const { t } = useTranslation();
   if (!weatherData) return null;
 
   const getIconClass = (weatherCondition: string): string => {
@@ -21,11 +24,21 @@ const WeatherDisplay: React.FC<WeatherDisplayProps> = ({ weatherData }) => {
     <div className="weather-container">
       <i className={getIconClass(weatherData.weather[0].main)}></i>
       <div>
-        <h3>Weather in {weatherData.name}</h3>
-        <p>Temperature: {weatherData.main.temp.toFixed(1)}°C</p>
-        <p>Feels Like: {weatherData.main.feels_like.toFixed(1)}°C</p>
-        <p>Humidity: {weatherData.main.humidity}%</p>
-        <p>Description: {weatherData.weather[0].description}</p>
+        <h3>{t('weather.title', { city: weatherData.name })}</h3>
+        <p>
+          {t('weather.temperature', { temp: weatherData.main.temp.toFixed(1) })}
+        </p>
+        <p>
+          {t('weather.feelsLike', {
+            feelsLike: weatherData.main.feels_like.toFixed(1),
+          })}
+        </p>
+        <p>{t('weather.humidity', { humidity: weatherData.main.humidity })}</p>
+        <p>
+          {t('weather.description', {
+            description: weatherData.weather[0].description,
+          })}
+        </p>
       </div>
     </div>
   );

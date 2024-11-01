@@ -1,0 +1,39 @@
+.language-switcher {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 10px 5px;
+
+  .logo {
+    margin: 0;
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+  }
+  .language-buttons {
+    display: flex;
+    align-items: center;
+    .language-button{
+      width: 80px;
+      height: 40px;
+      margin-left: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background-color: white;
+      color: #333;
+      cursor: pointer;
+      font-size: 16px;
+
+      &.active {
+        background-color: #2193b0;
+        color: white;
+        border-color: #2193b0;
+      }
+
+      &:hover {
+        background-color: #6dd5ed;
+        border-color: #6dd5ed;
+      }
+    }
+  }
+}

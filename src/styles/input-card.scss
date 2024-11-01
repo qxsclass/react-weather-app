@@ -1,0 +1,43 @@
+.input-card {
+  background: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  margin: 10px auto;
+  max-width: 500px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  input[type='text'] {
+    flex-grow: 1;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px;
+    font-size: 16px;
+
+    &:focus {
+      border-color: #66afe9;
+      outline: none;
+      box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);
+    }
+  }
+
+  button {
+    padding: 10px 20px;
+    background-color: #f0ad4e;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    color: white;
+
+    &:hover {
+      background-color: #ec971f;
+    }
+
+    &:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+  }
+}

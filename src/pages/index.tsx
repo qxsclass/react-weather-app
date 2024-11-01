@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { weatherClient } from '@/clients/weather-client';
-import '@/styles/wether.scss';
+import '@/styles/index.scss';
+import '@/styles/input-card.scss';
 import HourlyForecast from '@/components/hourly-forecast';
 import ForecastCard from '@/components/forecast-card';
 import WeatherDisplay from '@/components/weather-display';
@@ -8,8 +10,11 @@ import { calculateDailyAverages, groupByDay } from '@/utils/deal-daily-wether';
 import SpinnerLoading from '@/bases/spinner-loading';
 import { WeatherData, WeatherPoint } from '@/types/types';
 import { useDebounce } from '@/utils/debounce';
+import '@/i18n';
+import LanguageSwitcher from '@/components/atoms/language-switcher';
 
 const WeatherPage = () => {
+  const { t, i18n } = useTranslation();
   const [city, setCity] = useState('Beijing');
   // const [debouncedCity, setDebouncedCity] = useState<string>(city);
   const [weather, setWeather] = useState<WeatherData | null>(null);
@@ -121,9 +126,11 @@ const WeatherPage = () => {
   //     fetchWeatherAndForecast(city);
   //   }
   // }, [city, initiated]);
+  // 切换语言函数
 
   return (
     <div>
+      <LanguageSwitcher />
       <div className="input-card">
         <input
           type="text"
@@ -132,19 +139,20 @@ const WeatherPage = () => {
             setCity(e.target.value);
             setError(''); // 清除错误信息
           }}
-          placeholder="Enter city name"
+          placeholder={t('cityPlaceholder')}
         />
         <button
           onClick={() => fetchWeatherAndForecast(city)}
           disabled={loading}
         >
-          Get Weather
+          {t('getWeather')}
         </button>
       </div>
 
       {loading && (
         <div className="text-center">
           <SpinnerLoading />
+          <p>{t('loading')}</p>
         </div>
       )}
       {/*{error && <p className="error-message">{error}</p>}*/}

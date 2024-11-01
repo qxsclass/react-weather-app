@@ -1,0 +1,42 @@
+/* 导入天气图标样式 */
+@import '~weather-icons/css/weather-icons.css';
+
+/* 定义全局变量 */
+$background-color: #eef1f5;
+$font-family: 'Arial', sans-serif;
+$text-color: #333;
+$accent-color: #f0ad4e;
+
+/* 全局样式 */
+body {
+  background-color: $background-color;
+  font-family: 'Arial', sans-serif;
+  color: $text-color;
+  margin: 0;
+  padding: 0 8px;
+}
+
+h3 {
+  margin-top: 0;
+}
+
+.wi {
+  color: $accent-color;
+  font-size: 24px;
+}
+
+/* 如果 `.container` 和 `.card` 在多个组件中使用，可以保留在全局样式中 */
+.container {
+  width: 90%;
+  max-width: 500px;
+  margin: 20px auto;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+  text-align: center;
+}

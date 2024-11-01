@@ -4,23 +4,34 @@
   padding: 20px;
   border-radius: 10px;
   margin: 20px auto;
-  max-width: 600px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  max-width: 500px;
+  text-align: center;
+
+  h3 {
+    color: #fff;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
 
   .hourly-weather-container {
     display: flex;
     justify-content: space-around;
-    width: 100%;
+    flex-wrap: wrap;
 
     .hour-weather {
       display: flex;
       flex-direction: column;
       align-items: center;
+      margin-bottom: 15px;
+
+      p {
+        margin: 5px 0;
+      }
 
       i {
         font-size: 24px;
+        color: #f0ad4e;
+        margin-bottom: 5px;
       }
     }
   }
