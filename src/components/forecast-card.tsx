@@ -51,7 +51,7 @@ const ForecastCard: React.FC<ForecastCardProps> = ({ forecastData }) => {
             <div className="day-name">
               {formatDateWithZeroPadding(day.date)}
             </div>
-            <div className="weekday-name">{day.weekday}</div>
+            <div className="weekday-name">{t(day.weekday)}</div>
             <i className={getIconClass(day.condition)}></i>
             <div className="temp-range-container">
               <div className="temp-range">

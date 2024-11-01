@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { getConfig } from '@/configs';
 import '@/assets/styles/index.scss';
 import { WeatherData, Forecast, Location } from '@/types/types';
+import i18n from '@/i18n';
 
 export interface GeoLocation {
   lat: number;
@@ -71,7 +72,6 @@ const WeatherPointSchema = z.object({
   dt_txt: z.string(),
 });
 
-// 定义整个天气预报的模式
 // https://openweathermap.org/forecast5
 const ForecastSchema = z.object({
   cod: z.string(),
@@ -119,7 +119,7 @@ export const getLatLonByCity = async (
         q: city,
         appid: apiKey,
         limit: '1',
-        lang: 'zh_cn',
+        lang: 'en',
       },
     });
 
@@ -149,7 +149,7 @@ export const getWeatherByCoords = async (
       lon: lon.toString(),
       appid: apiKey,
       units: 'metric',
-      lang: 'zh_cn',
+      lang: 'en',
     },
   });
 };
@@ -157,6 +157,7 @@ export const getWeatherByCoords = async (
 export const weatherClient = {
   async getWeatherByCity(city: string): Promise<WeatherData> {
     console.log(apiKey);
+    const language = i18n.language;
     return apiClient({
       method: 'GET',
       url: `https://api.openweathermap.org/data/2.5/weather`,
@@ -165,12 +166,14 @@ export const weatherClient = {
         q: city,
         appid: apiKey,
         units: 'metric',
-        lang: 'zh_cn',
+        lang: language,
       },
     });
   },
 
   async getForecastByCity(city: string): Promise<Forecast> {
+    const language = i18n.language;
+    console.log(language);
     return apiClient({
       method: 'GET',
       // https://api.openweathermap.org/data/2.5/onecall
@@ -181,12 +184,13 @@ export const weatherClient = {
         exclude: 'minutely,hourly,current,alerts',
         appid: apiKey,
         units: 'metric',
-        lang: 'zh_cn',
+        lang: language,
       },
     });
   },
 
   async getGeosByCity(city: string): Promise<Location[]> {
+    const language = i18n.language;
     return apiClient({
       method: 'GET',
       // https://openweathermap.org/api/geocoding-api
@@ -196,12 +200,13 @@ export const weatherClient = {
         q: city,
         appid: apiKey,
         limit: '1',
-        lang: 'zh_cn',
+        lang: language,
       },
     });
   },
 
   async getCityNameFromCoords(lat: string, lon: string) {
+    const language = i18n.language;
     return apiClient({
       method: 'GET',
       url: `https://api.openweathermap.org/geo/1.0/reverse`,
@@ -211,12 +216,13 @@ export const weatherClient = {
         lon,
         limit: '1',
         appid: apiKey,
-        lang: 'zh_cn',
+        lang: language,
       },
     });
   },
 
   async getCitySuggestions(query: string) {
+    const language = i18n.language;
     return apiClient({
       method: 'GET',
       url: `https://api.openweathermap.org/geo/1.0/direct`,
@@ -225,6 +231,7 @@ export const weatherClient = {
         q: query,
         limit: '5',
         appid: apiKey,
+        lang: language,
       },
     });
   },

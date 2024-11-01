@@ -1,8 +1,13 @@
 import { useTranslation } from 'react-i18next';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import '@/styles/language-switcher.scss';
 
-const LanguageSwitcher = () => {
+interface LanguageSwitcherProps {
+  onLanguageChange: (language: string) => void;
+}
+const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
+  onLanguageChange,
+}) => {
   const { i18n } = useTranslation();
   const [activeLanguage, setActiveLanguage] = useState(i18n.language);
 
@@ -10,6 +15,9 @@ const LanguageSwitcher = () => {
     i18n.changeLanguage(lng);
     setActiveLanguage(lng); // 设置激活状态
     localStorage.setItem('language', lng);
+    if (onLanguageChange) {
+      onLanguageChange(lng);
+    }
   };
 
   return (

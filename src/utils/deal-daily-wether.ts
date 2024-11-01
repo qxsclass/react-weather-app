@@ -1,4 +1,5 @@
 import { WeatherPoint, DayForecast } from '@/types/types';
+import i18n from '@/i18n';
 
 export const groupByDay = (list: WeatherPoint[]) => {
   const groupedByDay: Record<string, WeatherPoint[]> = {};
@@ -77,7 +78,7 @@ export const calculateDailyAverages = (
         month: '2-digit',
         day: '2-digit',
       }),
-      weekday: dateObj.toLocaleDateString('zh-CN', { weekday: 'short' }),
+      weekday: dateObj.toLocaleDateString(i18n.language, { weekday: 'short' }),
       averageTemp,
       averageFeelsLike,
       maxTemp,

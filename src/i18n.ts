@@ -10,6 +10,15 @@ const resources = {
       loading: 'Loading...',
       hourlyWeatherTitle: 'Hourly Weather Today',
       forecastTitle: 'Weather Forecast for the Coming Days',
+      days: {
+        Sat: 'Sat',
+        Sun: 'Sun',
+        Mon: 'Mon',
+        Tue: 'Tue',
+        Wed: 'Wed',
+        Thu: 'Thu',
+        Fri: 'Fri',
+      },
       weather: {
         title: 'Weather in {{city}}',
         temperature: 'Temperature: {{temp}}°C',
@@ -32,6 +41,15 @@ const resources = {
       loading: '加载中...',
       hourlyWeatherTitle: '今日小时天气',
       forecastTitle: '未来几天的天气预报',
+      days: {
+        Sat: '周六',
+        Sun: '周日',
+        Mon: '周一',
+        Tue: '周二',
+        Wed: '周三',
+        Thu: '周四',
+        Fri: '周五',
+      },
       weather: {
         title: '当前城市天气：{{city}}',
         temperature: '温度：{{temp}}°C',
@@ -52,17 +70,17 @@ const resources = {
 // 初始化 i18n
 i18n.use(initReactI18next).init({
   resources,
-  lng: 'zh', // 默认语言
+  lng: 'en',
   fallbackLng: 'en',
   interpolation: {
     escapeValue: false, // react 已经防止了 XSS
   },
 });
 
-const savedLng =
-  typeof window !== 'undefined' ? localStorage.getItem('language') : 'zh';
-i18n.init({
-  lng: savedLng || 'zh',
-});
+// const savedLng =
+//   typeof window !== 'undefined' ? localStorage.getItem('language') : 'zh';
+// i18n.init({
+//   lng: savedLng || 'zh',
+// });
 
 export default i18n;

@@ -24,6 +24,11 @@ const WeatherPage = () => {
   const [error, setError] = useState('');
   const [initiated, setInitiated] = useState(false);
 
+  const handleLanguageChange = (language: string) => {
+    console.log(`Language changed to: ${language}`);
+    fetchWeatherAndForecast(city);
+  };
+
   // use debounce
   const debouncedSearchTerm = useDebounce(city, 500);
   useEffect(() => {
@@ -46,6 +51,7 @@ const WeatherPage = () => {
     try {
       const weatherData = await weatherClient.getWeatherByCity(cityName);
       const forecastResponse = await weatherClient.getForecastByCity(cityName);
+      console.log(forecastResponse);
       setWeather(weatherData);
       setForecast(forecastResponse.list);
       setHourlyData(forecastResponse.list.slice(0, 6));
@@ -130,7 +136,7 @@ const WeatherPage = () => {
 
   return (
     <div>
-      <LanguageSwitcher />
+      <LanguageSwitcher onLanguageChange={handleLanguageChange} />
       <div className="input-card">
         <input
           type="text"
@@ -150,7 +156,7 @@ const WeatherPage = () => {
       </div>
 
       {loading && (
-        <div className="text-center">
+        <div className="spinner-container">
           <SpinnerLoading />
           <p>{t('loading')}</p>
         </div>
