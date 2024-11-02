@@ -8,7 +8,7 @@ export interface SpinnerLoadingProps {
   styles?: React.CSSProperties;
 }
 
-const classPrefix = 'xgy-spinner-loading';
+// const classPrefix = 'xgy-spinner-loading';
 
 const SpinnerLoading: React.FC<SpinnerLoadingProps> = ({
   color = 'default',

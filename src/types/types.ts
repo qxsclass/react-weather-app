@@ -25,10 +25,27 @@ export interface WindDetails {
 
 export interface WeatherData {
   name: string;
-  main: MainDetails;
-  weather: WeatherCondition[];
-  wind: WindDetails;
-  dt?: number;
+  main: {
+    temp: number;
+    feels_like: number;
+    humidity: number;
+  };
+  weather: Array<{
+    main: string;
+    description: string;
+    id?: number;
+    icon?: string;
+  }>;
+  wind: {
+    speed: number;
+  };
+  coord: {
+    lat: number;
+    lon: number;
+  };
+  sys: {
+    country: string;
+  };
 }
 
 export interface WeatherPoint {

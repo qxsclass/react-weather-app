@@ -1,7 +1,6 @@
 import { apiClient } from './base/api-client';
 import { z } from 'zod';
 import { getConfig } from '@/configs';
-import '@/assets/styles/index.scss';
 import { WeatherData, Forecast, Location } from '@/types/types';
 import i18n from '@/i18n';
 
@@ -31,7 +30,7 @@ const WeatherSchema = z.object({
 });
 
 const WeatherPointSchema = z.object({
-  dt: z.number(), // 时间戳
+  dt: z.number(),
   main: z.object({
     temp: z.number(),
     feels_like: z.number(),
@@ -72,7 +71,6 @@ const WeatherPointSchema = z.object({
   dt_txt: z.string(),
 });
 
-// https://openweathermap.org/forecast5
 const ForecastSchema = z.object({
   cod: z.string(),
   message: z.number(),
@@ -107,134 +105,220 @@ const LocationsSchema = z.array(LocationSchema);
 const config = getConfig();
 const apiKey = config.openWeatherApiKey;
 
-export const getLatLonByCity = async (
-  city: string
-): Promise<GeoLocation | undefined> => {
-  try {
-    const response = await apiClient<Location[]>({
-      method: 'GET',
-      url: `https://api.openweathermap.org/geo/1.0/direct`,
-      zodSchema: LocationsSchema,
-      queryParams: {
-        q: city,
-        appid: apiKey,
-        limit: '1',
-        lang: 'en',
-      },
-    });
+interface TranslationResponse {
+  data: {
+    result: {
+      trans_result: Array<{
+        dst: string;
+      }>;
+    };
+  };
+}
 
-    if (response && response.length > 0) {
-      const location = response[0];
-      return {
-        lat: location.lat,
-        lon: location.lon,
-      };
-    }
-  } catch (e) {
-    console.error('Failed to fetch geolocation:', e);
-  }
-  return undefined;
-};
+// Filter out invalid characters from city name
+export function sanitizeCityName(cityName: string): string {
+  const sanitized = cityName
+    .replace(/[^\u4e00-\u9fa5a-zA-Z\s\-']/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 
-export const getWeatherByCoords = async (
-  lat: number,
-  lon: number
-): Promise<WeatherData> => {
-  return apiClient({
-    method: 'GET',
-    url: `https://api.openweathermap.org/data/2.5/weather`,
-    zodSchema: WeatherSchema,
-    queryParams: {
-      lat: lat.toString(),
-      lon: lon.toString(),
-      appid: apiKey,
-      units: 'metric',
-      lang: 'en',
-    },
-  });
-};
+  return sanitized || cityName;
+}
 
 export const weatherClient = {
-  async getWeatherByCity(city: string): Promise<WeatherData> {
-    console.log(apiKey);
-    const language = i18n.language;
-    return apiClient({
-      method: 'GET',
-      url: `https://api.openweathermap.org/data/2.5/weather`,
-      zodSchema: WeatherSchema,
-      queryParams: {
-        q: city,
-        appid: apiKey,
-        units: 'metric',
-        lang: language,
-      },
-    });
+  async translateCityName(cityName: string): Promise<string> {
+    try {
+      const sanitizedCityName = sanitizeCityName(cityName);
+      if (!sanitizedCityName) {
+        return cityName;
+      }
+
+      const isEnglishOrPinyin = /^[a-zA-Z\s\-']+$/.test(sanitizedCityName);
+      if (isEnglishOrPinyin) {
+        return sanitizedCityName;
+      }
+
+      const response = await apiClient<TranslationResponse>({
+        method: 'POST',
+        url: '/api/translate',
+        body: {
+          text: sanitizedCityName,
+          from: 'auto',
+          to: 'en',
+        },
+      });
+
+      console.log('Translation response:', response);
+
+      if (
+        response.success &&
+        response.data?.data?.result?.trans_result?.[0]?.dst
+      ) {
+        return response.data.data.result.trans_result[0].dst;
+      }
+
+      console.error('Translation failed:', response.message);
+      return sanitizedCityName;
+    } catch (error) {
+      console.error('Failed to translate city name:', error);
+      return cityName;
+    }
   },
 
-  async getForecastByCity(city: string): Promise<Forecast> {
+  async getWeatherByCity(city: string): Promise<WeatherData | null> {
     const language = i18n.language;
-    console.log(language);
-    return apiClient({
-      method: 'GET',
-      // https://api.openweathermap.org/data/2.5/onecall
-      url: `https://api.openweathermap.org/data/2.5/forecast`,
-      zodSchema: ForecastSchema,
-      queryParams: {
-        q: city,
-        exclude: 'minutely,hourly,current,alerts',
-        appid: apiKey,
-        units: 'metric',
-        lang: language,
-      },
-    });
+    try {
+      // 先获取城市的地理信息
+      const geoResponse = await apiClient<Location[]>({
+        method: 'GET',
+        url: 'https://api.openweathermap.org/geo/1.0/direct',
+        zodSchema: LocationsSchema,
+        queryParams: {
+          q: city,
+          limit: '1',
+          appid: apiKey,
+        },
+      });
+
+      if (
+        geoResponse.success &&
+        geoResponse.data &&
+        geoResponse.data.length > 0
+      ) {
+        const cityInfo = geoResponse.data[0];
+        // 获取当前语言的城市名，如果没有则使用默认名称
+        const localName = cityInfo.local_names?.[language] || cityInfo.name;
+
+        const response = await apiClient<WeatherData>({
+          method: 'GET',
+          url: `https://api.openweathermap.org/data/2.5/weather`,
+          queryParams: {
+            q: city,
+            appid: apiKey,
+            units: 'metric',
+            lang: language,
+          },
+        });
+
+        if (!response.success || !response.data) {
+          return null;
+        }
+
+        // 使用本地化的城市名
+        return {
+          ...response.data,
+          name: localName,
+        };
+      }
+
+      // 如果获取地理信息失败，使用普通请求
+      const response = await apiClient<WeatherData>({
+        method: 'GET',
+        url: `https://api.openweathermap.org/data/2.5/weather`,
+        queryParams: {
+          q: city,
+          appid: apiKey,
+          units: 'metric',
+          lang: language,
+        },
+      });
+
+      return response.success && response.data ? response.data : null;
+    } catch (error) {
+      console.error('Failed to fetch weather data:', error);
+      return null;
+    }
   },
 
-  async getGeosByCity(city: string): Promise<Location[]> {
+  async getForecastByCity(city: string): Promise<Forecast | null> {
     const language = i18n.language;
-    return apiClient({
-      method: 'GET',
-      // https://openweathermap.org/api/geocoding-api
-      url: `https://api.openweathermap.org/geo/1.0/direct`,
-      zodSchema: LocationsSchema,
-      queryParams: {
-        q: city,
-        appid: apiKey,
-        limit: '1',
-        lang: language,
-      },
-    });
+    try {
+      // 先获取城市的地理信息
+      const geoResponse = await apiClient<Location[]>({
+        method: 'GET',
+        url: 'https://api.openweathermap.org/geo/1.0/direct',
+        zodSchema: LocationsSchema,
+        queryParams: {
+          q: city,
+          limit: '1',
+          appid: apiKey,
+        },
+      });
+
+      if (
+        geoResponse.success &&
+        geoResponse.data &&
+        geoResponse.data.length > 0
+      ) {
+        const cityInfo = geoResponse.data[0];
+        const localName = cityInfo.local_names?.[language] || cityInfo.name;
+
+        const response = await apiClient<Forecast>({
+          method: 'GET',
+          url: `https://api.openweathermap.org/data/2.5/forecast`,
+          zodSchema: ForecastSchema,
+          queryParams: {
+            q: city,
+            appid: apiKey,
+            units: 'metric',
+            lang: language,
+          },
+        });
+
+        if (!response.success || !response.data) {
+          return null;
+        }
+
+        // 使用本地化的城市名
+        return {
+          ...response.data,
+          city: {
+            ...response.data.city,
+            name: localName,
+          },
+        };
+      }
+
+      const response = await apiClient<Forecast>({
+        method: 'GET',
+        url: `https://api.openweathermap.org/data/2.5/forecast`,
+        zodSchema: ForecastSchema,
+        queryParams: {
+          q: city,
+          appid: apiKey,
+          units: 'metric',
+          lang: language,
+        },
+      });
+
+      return response.success && response.data ? response.data : null;
+    } catch (error) {
+      console.error('Failed to fetch forecast data:', error);
+      return null;
+    }
   },
 
-  async getCityNameFromCoords(lat: string, lon: string) {
-    const language = i18n.language;
-    return apiClient({
-      method: 'GET',
-      url: `https://api.openweathermap.org/geo/1.0/reverse`,
-      zodSchema: LocationsSchema,
-      queryParams: {
-        lat,
-        lon,
-        limit: '1',
-        appid: apiKey,
-        lang: language,
-      },
-    });
-  },
+  async getCityNameFromCoords(
+    lat: string,
+    lon: string
+  ): Promise<Location[] | null> {
+    try {
+      const response = await apiClient<Location[]>({
+        method: 'GET',
+        url: 'https://api.openweathermap.org/geo/1.0/reverse',
+        zodSchema: LocationsSchema,
+        queryParams: {
+          lat: lat,
+          lon: lon,
+          limit: '1',
+          appid: apiKey,
+        },
+      });
 
-  async getCitySuggestions(query: string) {
-    const language = i18n.language;
-    return apiClient({
-      method: 'GET',
-      url: `https://api.openweathermap.org/geo/1.0/direct`,
-      zodSchema: LocationsSchema,
-      queryParams: {
-        q: query,
-        limit: '5',
-        appid: apiKey,
-        lang: language,
-      },
-    });
+      return response.success && response.data ? response.data : null;
+    } catch (error) {
+      console.error('Failed to get city name from coordinates:', error);
+      return null;
+    }
   },
-  getLatLonByCity,
-  getWeatherByCoords,
 };

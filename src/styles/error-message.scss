@@ -1,0 +1,78 @@
+.error-message {
+    background-color: #fff3f3;
+    color: #d32f2f;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin: 16px auto;
+    max-width: 400px;
+    text-align: center;
+    font-size: 14px;
+    border: 1px solid #ffcdd2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    animation: slideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &::before {
+        content: '⚠️';
+        margin-right: 8px;
+        font-size: 16px;
+    }
+
+    @keyframes slideIn {
+        0% {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+
+        70% {
+            transform: translateY(5px);
+        }
+
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    &:hover {
+        background-color: #ffebee;
+        transform: scale(1.01);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    &.fade-out {
+        animation: slideOut 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    @keyframes slideOut {
+        0% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        100% {
+            opacity: 0;
+            transform: translateY(-20px) scale(0.95);
+        }
+    }
+}
+
+// 针对不同类型的错误使用不同的颜色
+.error-message {
+    &.warning {
+        background-color: #fff8e1;
+        border-color: #ffe082;
+        color: #ff8f00;
+        box-shadow: 0 2px 8px rgba(255, 143, 0, 0.1);
+    }
+
+    &.critical {
+        background-color: #fbe9e7;
+        border-color: #ffccbc;
+        color: #d84315;
+        box-shadow: 0 2px 8px rgba(216, 67, 21, 0.1);
+    }
+}

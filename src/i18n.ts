@@ -31,6 +31,11 @@ const resources = {
         locationUnavailable: 'Location information is unavailable',
         timeout: 'The request to get user location timed out',
         unknownError: 'An unknown error occurred',
+        cityNotFound: 'city not found',
+        translationFailed: 'Failed to translate city name',
+        generalError: 'Failed to fetch weather data',
+        cityNameTooShort: 'City name must be at least 3 characters',
+        noCityProvided: 'Please enter a city name',
       },
     },
   },
@@ -62,6 +67,11 @@ const resources = {
         locationUnavailable: '无法获取位置信息',
         timeout: '请求获取用户位置超时',
         unknownError: '发生未知错误',
+        cityNotFound: 'city not found',
+        translationFailed: '城市名称翻译失败',
+        generalError: '获取天气数据失败',
+        cityNameTooShort: '城市名称至少需要3个字符',
+        noCityProvided: '请输入城市名称',
       },
     },
   },
@@ -70,17 +80,11 @@ const resources = {
 // 初始化 i18n
 i18n.use(initReactI18next).init({
   resources,
-  lng: 'en',
+  lng: 'en', // 默认语言
   fallbackLng: 'en',
   interpolation: {
-    escapeValue: false, // react 已经防止了 XSS
+    escapeValue: false,
   },
 });
-
-// const savedLng =
-//   typeof window !== 'undefined' ? localStorage.getItem('language') : 'zh';
-// i18n.init({
-//   lng: savedLng || 'zh',
-// });
 
 export default i18n;

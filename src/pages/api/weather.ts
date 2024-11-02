@@ -1,9 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { z } from 'zod';
-import getLatLonByCity from '@/utils/dealGeoInfo';
+import getGeosByCity from '@/utils/dealGeoInfo';
 import { weatherClient } from '@/clients/weather-client';
 
-// Define Zod schema for the weather API response validation
 const WeatherSchema = z.object({
   main: z.object({
     temp: z.number(),
@@ -31,7 +30,7 @@ export default async function handler(
     console.log('accept city name:', city);
     try {
       // 获取地理编码
-      const geos = await getLatLonByCity(city);
+      const geos = await getGeosByCity(city);
       console.log('accept geos:', geos);
 
       // 检查 geos 是否为 undefined
@@ -40,10 +39,7 @@ export default async function handler(
       }
 
       // 获取天气信息
-      const weatherResponse = weatherClient.getWeatherByCoords(
-        geos?.lat,
-        geos?.lon
-      );
+      const weatherResponse = await weatherClient.getWeatherByCity(city);
       const weatherData = WeatherSchema.parse(weatherResponse);
       res.status(200).json(weatherData);
     } catch (error) {

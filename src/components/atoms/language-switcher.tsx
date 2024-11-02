@@ -1,38 +1,50 @@
 import { useTranslation } from 'react-i18next';
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import '@/styles/language-switcher.scss';
 
 interface LanguageSwitcherProps {
   onLanguageChange: (language: string) => void;
 }
+
 const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   onLanguageChange,
 }) => {
   const { i18n } = useTranslation();
-  const [activeLanguage, setActiveLanguage] = useState(i18n.language);
+  const [currentLang, setCurrentLang] = useState(i18n.language || 'en');
 
-  const changeLanguage = (lng: string) => {
-    i18n.changeLanguage(lng);
-    setActiveLanguage(lng); // 设置激活状态
-    localStorage.setItem('language', lng);
-    if (onLanguageChange) {
-      onLanguageChange(lng);
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedLang = localStorage.getItem('language');
+      const browserLang = navigator.language.toLowerCase();
+      const defaultLang = browserLang.startsWith('zh') ? 'zh' : 'en';
+      const initialLang = savedLang || defaultLang;
+
+      setCurrentLang(initialLang);
+      i18n.changeLanguage(initialLang);
+      localStorage.setItem('language', initialLang);
     }
+  }, []);
+
+  const handleLanguageChange = (language: string) => {
+    setCurrentLang(language);
+    i18n.changeLanguage(language);
+    localStorage.setItem('language', language);
+    onLanguageChange(language);
   };
 
   return (
     <div className="language-switcher">
-      <h3 className="logo">Weather</h3>
+      <h1 className="logo">Weather</h1>
       <div className="language-buttons">
         <button
-          onClick={() => changeLanguage('en')}
-          className={`language-button ${activeLanguage === 'en' ? 'active' : ''}`}
+          className={`language-button ${currentLang === 'en' ? 'active' : ''}`}
+          onClick={() => handleLanguageChange('en')}
         >
           English
         </button>
         <button
-          onClick={() => changeLanguage('zh')}
-          className={`language-button ${activeLanguage === 'zh' ? 'active' : ''}`}
+          className={`language-button ${currentLang === 'zh' ? 'active' : ''}`}
+          onClick={() => handleLanguageChange('zh')}
         >
           中文
         </button>

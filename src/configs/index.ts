@@ -6,9 +6,17 @@ export enum Environment {
   prod = 'prod',
 }
 
+export interface Config {
+  openWeatherApiKey: string;
+  baiduTranslateAppId: string;
+  baiduTranslateKey: string;
+}
+
 const configSchema = z.object({
   environment: z.nativeEnum(Environment),
   openWeatherApiKey: z.string(),
+  baiduTranslateAppId: z.string(),
+  baiduTranslateKey: z.string(),
 });
 
 export function getConfig() {
@@ -20,6 +28,9 @@ export function getConfig() {
     openWeatherApiKey:
       getEnvVariable('NEXT_PUBLIC_OPENWEATHER_API_KEY') ??
       'aeb40a22f63323746108fcefb00c0f9b',
+    baiduTranslateAppId:
+      getEnvVariable('NEXT_PUBLIC_BAIDU_TRANSLATE_APPID') ?? '',
+    baiduTranslateKey: getEnvVariable('NEXT_PUBLIC_BAIDU_TRANSLATE_KEY') ?? '',
   });
 }
 

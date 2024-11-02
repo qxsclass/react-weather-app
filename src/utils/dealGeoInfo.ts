@@ -1,41 +1,34 @@
 import { weatherClient } from '@/clients/weather-client';
+import { Location, WeatherData } from '@/types/types';
 
-type GeoLocation = {
-  lat: number;
-  lon: number;
-};
-
-export default async function getLatLonByCity(
-  city: string
-): Promise<GeoLocation | undefined> {
-  // geo code
-  // const geoResponse = axios.get(
-  //   `http://api.openweathermap.org/geo/1.0/direct`,
-  //   {
-  //     params: {
-  //       q: city,
-  //       limit: 1,
-  //       appid: process.env.OPENWEATHER_API_KEY,
-  //     },
-  //   }
-  // );
-  console.log('accept city name:', city);
+export async function getGeosByCity(city: string): Promise<Location[] | null> {
   try {
-    // Assuming getGeosByCity is an async function returning a promise
-    const geoResponse = await weatherClient.getGeosByCity(city);
-    if (geoResponse.length > 0) {
-      const location = geoResponse[0];
-      console.log('Location found:', location);
-      return {
-        lat: location.lat,
-        lon: location.lon,
-      };
-    } else {
-      console.log('No location found for the given city.');
-      return undefined;
+    const response = await weatherClient.getWeatherByCity(city);
+    if (!response) {
+      return null;
     }
-  } catch (e) {
-    console.error('Failed to fetch geolocation:', e);
+
+    const location: Location = {
+      name: response.name,
+      lat: response.coord.lat,
+      lon: response.coord.lon,
+      country: response.sys.country,
+      state: undefined,
+      local_names: undefined,
+    };
+
+    return [location];
+  } catch (error) {
+    console.error('Failed to get geos by city:', error);
+    return null;
   }
-  return undefined; // Return undefined if there is an error or no data
 }
+
+export async function getCityNameFromCoords(
+  lat: string,
+  lon: string
+): Promise<Location[] | null> {
+  return weatherClient.getCityNameFromCoords(lat, lon);
+}
+
+export default getGeosByCity;

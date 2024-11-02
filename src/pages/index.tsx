@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { weatherClient } from '@/clients/weather-client';
+import { weatherClient, sanitizeCityName } from '@/clients/weather-client';
 import '@/styles/index.scss';
 import '@/styles/input-card.scss';
 import HourlyForecast from '@/components/hourly-forecast';
@@ -12,6 +12,17 @@ import { WeatherData, WeatherPoint } from '@/types/types';
 import { useDebounce } from '@/utils/debounce';
 import '@/i18n';
 import LanguageSwitcher from '@/components/atoms/language-switcher';
+import '@/styles/error-message.scss';
+
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+    status?: number;
+  };
+  message?: string;
+}
 
 const WeatherPage = () => {
   const { t, i18n } = useTranslation();
@@ -26,7 +37,10 @@ const WeatherPage = () => {
 
   const handleLanguageChange = (language: string) => {
     console.log(`Language changed to: ${language}`);
-    fetchWeatherAndForecast(city);
+    i18n.changeLanguage(language).then(() => {
+      localStorage.setItem('language', language);
+      fetchWeatherAndForecast(city);
+    });
   };
 
   // use debounce
@@ -38,28 +52,66 @@ const WeatherPage = () => {
   }, [debouncedSearchTerm]);
 
   const fetchWeatherAndForecast = async (cityName: string) => {
-    if (!cityName || cityName.length < 3) {
-      // 输入长度不足，不发送请求
+    if (!cityName) {
+      setError(t('error.noCityProvided'));
       return;
     }
-    if (!city) {
-      console.error('No city provided for the weather query.');
+
+    // 城市名长度验证逻辑
+    const isChinese = /[\u4e00-\u9fa5]/.test(cityName);
+    if (
+      (isChinese && cityName.length < 2) ||
+      (!isChinese && cityName.length < 3)
+    ) {
+      setError(t('error.cityNameTooShort'));
       return;
     }
+
     setLoading(true);
     setError('');
+
     try {
-      const weatherData = await weatherClient.getWeatherByCity(cityName);
-      const forecastResponse = await weatherClient.getForecastByCity(cityName);
-      console.log(forecastResponse);
+      const translatedCityName =
+        await weatherClient.translateCityName(cityName);
+      console.log(`Translated city name: ${cityName} -> ${translatedCityName}`);
+
+      const weatherData =
+        await weatherClient.getWeatherByCity(translatedCityName);
+      if (!weatherData) {
+        setError(t('error.cityNotFound'));
+        return;
+      }
+
+      const forecastResponse =
+        await weatherClient.getForecastByCity(translatedCityName);
+      if (!forecastResponse) {
+        setError(t('error.cityNotFound'));
+        return;
+      }
+
       setWeather(weatherData);
       setForecast(forecastResponse.list);
       setHourlyData(forecastResponse.list.slice(0, 6));
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
+      console.error('Error details:', err);
+
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as ApiError;
+        if (axiosError.response?.data?.message === 'city not found') {
+          setError(t('error.cityNotFound'));
+        } else {
+          setError(t('error.generalError'));
+        }
+      } else if (err instanceof Error) {
+        if (err.message.includes('city not found')) {
+          setError(t('error.cityNotFound'));
+        } else if (err.message.includes('translation failed')) {
+          setError(t('error.translationFailed'));
+        } else {
+          setError(t('error.generalError'));
+        }
       } else {
-        setError('Failed to fetch weather data');
+        setError(t('error.unknownError'));
       }
     } finally {
       setLoading(false);
@@ -69,14 +121,20 @@ const WeatherPage = () => {
   useEffect(() => {
     const handleGeoSuccess = async (position: GeolocationPosition) => {
       const { latitude, longitude } = position.coords;
-      const cityNameData = await weatherClient.getCityNameFromCoords(
+      const response = await weatherClient.getCityNameFromCoords(
         latitude.toString(),
         longitude.toString()
       );
-      const cityName = cityNameData[0]?.name || 'Beijing';
-      setCity(cityNameData[0]?.name || 'Beijing');
-      setInitiated(true);
-      await fetchWeatherAndForecast(cityName);
+
+      if (response && response.length > 0) {
+        const cityName = response[0].name || 'Beijing';
+        setCity(cityName);
+        setInitiated(true);
+        await fetchWeatherAndForecast(cityName);
+      } else {
+        setCity('Beijing');
+        await fetchWeatherAndForecast('Beijing');
+      }
     };
 
     const handleGeoError = (error: GeolocationPositionError) => {
@@ -126,13 +184,31 @@ const WeatherPage = () => {
     }
   }, []);
 
-  // // 监听城市名称的变化来更新天气信息
-  // useEffect(() => {
-  //   if (initiated) {
-  //     fetchWeatherAndForecast(city);
-  //   }
-  // }, [city, initiated]);
-  // 切换语言函数
+  // 添加错误消失的计时器效果
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (error) {
+      timer = setTimeout(() => {
+        setError('');
+      }, 4000);
+    }
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
+  }, [error]);
+
+  useEffect(() => {
+    const savedLang = localStorage.getItem('language');
+    if (savedLang && ['en', 'zh'].includes(savedLang)) {
+      i18n.changeLanguage(savedLang);
+    } else {
+      const browserLang = navigator.language.toLowerCase();
+      const initialLang = browserLang.startsWith('zh') ? 'zh' : 'en';
+      i18n.changeLanguage(initialLang);
+    }
+  }, []);
 
   return (
     <div>
@@ -142,8 +218,9 @@ const WeatherPage = () => {
           type="text"
           value={city}
           onChange={(e) => {
-            setCity(e.target.value);
-            setError(''); // 清除错误信息
+            const sanitizedValue = sanitizeCityName(e.target.value);
+            setCity(sanitizedValue);
+            setError('');
           }}
           placeholder={t('cityPlaceholder')}
         />
@@ -161,7 +238,18 @@ const WeatherPage = () => {
           <p>{t('loading')}</p>
         </div>
       )}
-      {/*{error && <p className="error-message">{error}</p>}*/}
+      {error && (
+        <p
+          className={`error-message ${error.includes('not found')
+              ? 'warning'
+              : error.includes('failed')
+                ? 'critical'
+                : ''
+            }`}
+        >
+          {error}
+        </p>
+      )}
       {weather && <WeatherDisplay weatherData={weather} />}
       {hourlyData && <HourlyForecast hourlyData={hourlyData} />}
       {forecast && (
